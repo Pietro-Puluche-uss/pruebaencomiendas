@@ -1,3 +1,10 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Ruta
+
+
+@admin.register(Ruta)
+class RutaAdmin(admin.ModelAdmin):
+    list_display = ("codigo", "origen", "destino", "distancia_km", "activa")
+    list_filter = ("activa",)
+    search_fields = ("codigo", "origen", "destino")
