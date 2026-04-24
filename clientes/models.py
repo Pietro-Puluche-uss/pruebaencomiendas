@@ -1,18 +1,60 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+
+from config.choices import EstadoGeneral, TipoDocumento
+from envios.querysets import ClienteQuerySet
+from envios.validators import validar_nro_doc_dni
 
 
 class Cliente(models.Model):
-    nombre_completo = models.CharField(max_length=120)
-    documento = models.CharField(max_length=20, unique=True)
-    telefono = models.CharField(max_length=20)
-    email = models.EmailField(blank=True)
-    direccion = models.CharField(max_length=255)
+    objects = ClienteQuerySet.as_manager()
+
+    tipo_doc = models.CharField(
+        max_length=3,
+        choices=TipoDocumento.choices,
+        default=TipoDocumento.DNI,
+    )
+    nro_doc = models.CharField(max_length=15, unique=True)
+    nombres = models.CharField(max_length=100, default="")
+    apellidos = models.CharField(max_length=100, default="")
+    telefono = models.CharField(max_length=15, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    direccion = models.TextField(blank=True, null=True)
+    estado = models.IntegerField(
+        choices=EstadoGeneral.choices,
+        default=EstadoGeneral.ACTIVO,
+    )
     fecha_registro = models.DateTimeField(auto_now_add=True)
 
+    def clean(self):
+        errors = {}
+
+        if self.tipo_doc == TipoDocumento.DNI and self.nro_doc:
+            try:
+                validar_nro_doc_dni(self.nro_doc)
+            except ValidationError as exc:
+                errors["nro_doc"] = exc
+
+        if errors:
+            raise ValidationError(errors)
+
     def __str__(self):
-        return f"{self.nombre_completo} ({self.documento})"
+        return f"{self.nro_doc} - {self.apellidos}, {self.nombres}"
+
+    @property
+    def nombre_completo(self):
+        return f"{self.apellidos}, {self.nombres}"
+
+    @property
+    def esta_activo(self):
+        return self.estado == EstadoGeneral.ACTIVO
+
+    @property
+    def total_encomiendas_enviadas(self):
+        return self.envios_como_remitente.count()
 
     class Meta:
+        db_table = "clientes"
         verbose_name = "Cliente"
         verbose_name_plural = "Clientes"
-        ordering = ["nombre_completo"]
+        ordering = ["apellidos", "nombres"]
