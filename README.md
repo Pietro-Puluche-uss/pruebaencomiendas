@@ -6,16 +6,22 @@ Proyecto base en Django para la sesion 02. Incluye las apps `envios`, `clientes`
 
 ```bash
 docker compose up --build -d
-docker compose exec web python manage.py makemigrations
 docker compose exec web python manage.py migrate
 docker compose exec web python manage.py createsuperuser
 ```
 
 ## Accesos
 
-- App: `http://localhost:8000`
+- App (Nginx): `http://localhost:8000`
 - Admin: `http://localhost:8000/admin`
 - pgAdmin: `http://localhost:5050`
+
+## Arquitectura
+
+- `nginx` expone la aplicacion al navegador.
+- `web` ejecuta Django con `gunicorn`.
+- `db` corre PostgreSQL.
+- `pgadmin` permite inspeccionar la base desde navegador.
 
 ## pgAdmin
 
