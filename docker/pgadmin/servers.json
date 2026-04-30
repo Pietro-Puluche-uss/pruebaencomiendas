@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Encomiendas PostgreSQL",
+      "Group": "Encomiendas",
+      "Host": "db",
+      "Port": 5432,
+      "MaintenanceDB": "encomiendas_db",
+      "Username": "encomiendas_user",
+      "SSLMode": "prefer"
+    }
+  }
+}

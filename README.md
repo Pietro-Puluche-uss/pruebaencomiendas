@@ -15,3 +15,20 @@ docker compose exec web python manage.py createsuperuser
 
 - App: `http://localhost:8000`
 - Admin: `http://localhost:8000/admin`
+- pgAdmin: `http://localhost:5050`
+
+## pgAdmin
+
+Credenciales web por defecto:
+
+- Usuario: `admin@encomiendas.local`
+- Password: `admin123`
+
+El servicio PostgreSQL del proyecto queda preconfigurado en pgAdmin con:
+
+- Host: `db`
+- Puerto: `5432`
+- Base de datos: `encomiendas_db`
+- Usuario BD: `encomiendas_user`
+
+Si cambias `DB_NAME` o `DB_USER`, actualiza tambien `docker/pgadmin/servers.json` o registra el servidor manualmente desde la interfaz web.
