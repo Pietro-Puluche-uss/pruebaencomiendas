@@ -21,7 +21,7 @@ docker compose exec web python manage.py createsuperuser
 
 Credenciales web por defecto:
 
-- Usuario: `admin@encomiendas.local`
+- Usuario: `admin@encomiendas.com`
 - Password: `admin123`
 
 El servicio PostgreSQL del proyecto queda preconfigurado en pgAdmin con:
