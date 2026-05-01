@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
 from .models import Empleado, Encomienda, HistorialEstado
 
@@ -7,22 +8,98 @@ from .models import Empleado, Encomienda, HistorialEstado
 class EncomiendaAdmin(admin.ModelAdmin):
     list_display = (
         "codigo",
-        "remitente",
-        "destinatario",
+        "remitente_nombre",
+        "destinatario_nombre",
         "ruta",
-        "estado",
+        "estado_badge",
+        "peso_kg",
         "fecha_registro",
     )
-    list_filter = ("estado", "ruta")
-    search_fields = ("codigo", "remitente__nro_doc", "destinatario__nro_doc")
-    readonly_fields = ("fecha_registro",)
+    list_filter = ("estado", "ruta", "fecha_registro")
+    search_fields = (
+        "codigo",
+        "remitente__apellidos",
+        "remitente__nombres",
+        "destinatario__apellidos",
+        "destinatario__nombres",
+        "remitente__nro_doc",
+    )
+    ordering = ("-fecha_registro",)
+    list_per_page = 20
+    fieldsets = (
+        (
+            "Identificacion",
+            {
+                "fields": ("codigo", "descripcion", "peso_kg", "volumen_cm3"),
+            },
+        ),
+        (
+            "Partes",
+            {
+                "fields": ("remitente", "destinatario", "ruta", "empleado_registro"),
+            },
+        ),
+        (
+            "Estado y fechas",
+            {
+                "fields": (
+                    "estado",
+                    "costo_envio",
+                    "fecha_registro",
+                    "fecha_entrega_est",
+                    "fecha_entrega_real",
+                )
+            },
+        ),
+        (
+            "Notas",
+            {
+                "classes": ("collapse",),
+                "fields": ("observaciones",),
+            },
+        ),
+    )
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = ("fecha_registro", "fecha_entrega_real")
+        if obj:
+            return ("codigo",) + readonly_fields
+        return readonly_fields
+
+    @admin.display(description="Remitente")
+    def remitente_nombre(self, obj):
+        if obj.remitente:
+            return obj.remitente.nombre_completo
+        return "-"
+
+    @admin.display(description="Destinatario")
+    def destinatario_nombre(self, obj):
+        if obj.destinatario:
+            return obj.destinatario.nombre_completo
+        return "-"
+
+    @admin.display(description="Estado")
+    def estado_badge(self, obj):
+        colors = {
+            "PE": "#6c757d",
+            "TR": "#0d6efd",
+            "DE": "#fd7e14",
+            "EN": "#198754",
+            "DV": "#dc3545",
+        }
+        color = colors.get(obj.estado, "#6c757d")
+        return format_html(
+            '<span style="background:{};color:white;padding:2px 8px;border-radius:4px">{}</span>',
+            color,
+            obj.get_estado_display(),
+        )
 
 
 @admin.register(Empleado)
 class EmpleadoAdmin(admin.ModelAdmin):
-    list_display = ("codigo", "apellidos", "nombres", "cargo", "estado")
+    list_display = ("codigo", "apellidos", "nombres", "cargo", "email", "estado")
     list_filter = ("estado", "cargo")
-    search_fields = ("codigo", "apellidos", "nombres")
+    search_fields = ("codigo", "apellidos", "nombres", "email")
     filter_horizontal = ("rutas_asignadas",)
 
 
@@ -35,4 +112,12 @@ class HistorialEstadoAdmin(admin.ModelAdmin):
         "empleado",
         "fecha_cambio",
     )
-    readonly_fields = ("fecha_cambio",)
+    readonly_fields = (
+        "encomienda",
+        "estado_anterior",
+        "estado_nuevo",
+        "empleado",
+        "fecha_cambio",
+    )
+    list_filter = ("estado_nuevo",)
+    ordering = ("-fecha_cambio",)
