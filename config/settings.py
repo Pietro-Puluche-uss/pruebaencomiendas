@@ -16,6 +16,11 @@ ALLOWED_HOSTS = [
     for host in config("ALLOWED_HOSTS", default="").split(",")
     if host.strip()
 ]
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in config("CSRF_TRUSTED_ORIGINS", default="").split(",")
+    if origin.strip()
+]
 
 
 INSTALLED_APPS = [
